@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import bcrypt from "bcrypt";
-// Presumindo que sua função de token no arquivo lib/session-token.ts se chame createSessionToken
 import { createSessionToken } from "@/lib/session-token";
+// Presumindo que sua função de token no arquivo lib/session-token.ts se chame createSessionToken
 
 export async function POST(req: Request) {
   try {
