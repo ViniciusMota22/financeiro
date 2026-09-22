@@ -25,3 +25,7 @@ export function verifySession(token:string,password:string,secret:string,now=Dat
     return Number.isInteger(value.exp)&&value.exp>Math.floor(now/1000)&&value.exp<=Math.floor(now/1000)+SESSION_SECONDS&&value.version===signature(password,secret);
   }catch{return false;}
 }
+
+export function createSessionToken(password: string, secret: string) {
+  return issueSession(password, secret);
+}
