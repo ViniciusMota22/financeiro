@@ -26,7 +26,8 @@ export default function EntrarPage() {
 
       if (res.ok) {
         // Sucesso! Vai para a página inicial
-        router.push("/");
+        router.replace("/");
+        router.refresh();
       } else {
         const data = await res.json();
         setError(data.error || "Ocorreu um erro. Tente novamente.");
@@ -56,9 +57,9 @@ export default function EntrarPage() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label className="text-sm font-medium text-slate-700">Seu e-mail</label>
+            <label htmlFor="email" className="text-sm font-medium text-slate-700">Seu e-mail</label>
             <input 
-              type="email" 
+              id="email" autoComplete="email" maxLength={254} type="email" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full border border-slate-300 rounded-lg p-2.5 mt-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" 
@@ -68,9 +69,9 @@ export default function EntrarPage() {
           </div>
           
           <div>
-            <label className="text-sm font-medium text-slate-700">Sua senha</label>
+            <label htmlFor="password" className="text-sm font-medium text-slate-700">Sua senha</label>
             <input 
-              type="password" 
+              id="password" autoComplete={isLogin ? "current-password" : "new-password"} minLength={isLogin ? 1 : 8} maxLength={72} type="password" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full border border-slate-300 rounded-lg p-2.5 mt-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" 
@@ -79,7 +80,8 @@ export default function EntrarPage() {
             />
           </div>
 
-          {error && <p className="text-red-500 text-sm font-medium text-center">{error}</p>}
+          {!isLogin && <p className="text-sm text-slate-500">Use pelo menos 8 caracteres. Limite de 72 bytes (acentos e emojis podem ocupar mais de um byte).</p>}
+          {error && <p role="alert" className="text-red-500 text-sm font-medium text-center">{error}</p>}
 
           <button 
             type="submit" 
@@ -91,8 +93,10 @@ export default function EntrarPage() {
         </form>
 
         <button 
+          disabled={loading}
           onClick={() => {
             setIsLogin(!isLogin);
+            setPassword("");
             setError("");
           }} 
           className="text-blue-600 text-sm mt-6 w-full text-center hover:underline font-medium"

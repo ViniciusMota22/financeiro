@@ -2,10 +2,12 @@ import {get,put,BlobPreconditionFailedError} from '@vercel/blob';
 import {emptyState} from './finance.ts';
 import type {State} from './finance.ts';
 import {financeSchema} from './finance-schema.ts';
-const pathname='registro-financeiro/finances.json';
+import {isUserId} from './session-token.ts';
 export class RevisionConflict extends Error {}
 // Injected SDK methods let tests cover storage failures without real credentials.
-export function createFinanceStore(storage:Pick<typeof import('@vercel/blob'),'get'|'put'>={get,put}){
+export function createFinanceStore(userId:string,storage:Pick<typeof import('@vercel/blob'),'get'|'put'>={get,put}){
+  if(!isUserId(userId))throw new Error('Invalid user ID');
+  const pathname='registro-financeiro/users/'+userId+'/finances.json';
   function options(){const token=process.env.BLOB_READ_WRITE_TOKEN;if(!token)throw new Error('BLOB_READ_WRITE_TOKEN não configurado');return {token,access:'private' as const};}
   return {
     async read(){
@@ -28,3 +30,4 @@ export function createFinanceStore(storage:Pick<typeof import('@vercel/blob'),'g
     }
   };
 }
+

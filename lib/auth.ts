@@ -1,12 +1,13 @@
 import {cookies} from 'next/headers';
-import {authConfig,SESSION_COOKIE,verifySession} from './session-token';
-export async function isAuthenticated(){
-  const config=authConfig();if(!config)return false;
-  const token=(await cookies()).get(SESSION_COOKIE)?.value;
-  return !!token&&verifySession(token,config.password,config.secret);
+import {sessionSecret,SESSION_COOKIE,verifySession,passwordVersion} from './session-token';
+import {prisma} from './db';
+export {isSameOrigin} from './request-origin';
+export async function getSessionUser(){
+  const secret=sessionSecret();if(!secret)return null;
+  const token=(await cookies()).get(SESSION_COOKIE)?.value;if(!token)return null;
+  const session=verifySession(token,secret);if(!session)return null;
+  const user=await prisma.user.findUnique({where:{id:session.userId},select:{id:true,email:true,password:true}});
+  if(!user||passwordVersion(user.password,secret)!==session.passwordVersion)return null;
+  return {id:user.id,email:user.email};
 }
-export function isSameOrigin(request:Request){
-  if(request.headers.get('sec-fetch-site')==='cross-site')return false;
-  const origin=request.headers.get('origin');
-  return origin!==null&&origin===new URL(request.url).origin;
-}
+export async function isAuthenticated(){return (await getSessionUser())!==null;}
