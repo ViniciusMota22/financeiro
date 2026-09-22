@@ -26,6 +26,8 @@ export function verifySession(token:string,password:string,secret:string,now=Dat
   }catch{return false;}
 }
 
-export function createSessionToken(password: string, secret: string) {
-  return issueSession(password, secret);
+export function createSessionToken(password?: string, secret?: string) {
+  const config = authConfig();
+  if (!config) throw new Error("Auth config missing");
+  return issueSession(password || config.password, secret || config.secret);
 }
