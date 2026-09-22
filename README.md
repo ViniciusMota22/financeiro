@@ -1,70 +1,67 @@
-# Registro financeiro — versão Vercel
+# Registro financeiro — Next.js, Prisma e Neon
 
-Esta versão corrige a incompatibilidade do pacote anterior: o build agora usa Next.js e gera `.next/routes-manifest.json`. O armazenamento D1 e o login do Sites foram substituídos por Vercel Blob privado e senha pessoal.
+## Correção de cadastro e login
 
-## Atualizar o projeto que falhou
+- O frontend e as duas rotas usam `{ email, password }`.
+- Cadastro: `app/api/auth/register/route.ts` (o arquivo anterior `rout.ts` não era reconhecido como rota).
+- O schema Prisma corresponde à tabela existente no Neon: `id String @default(cuid())`, `email @unique` e `password String`. Não há conversão do ID para número.
+- O cadastro normaliza o e-mail, valida os campos e salva somente `bcrypt.hash(password, 12)`.
+- O login utiliza `bcrypt.compare`. Senhas legadas em texto plano são rejeitadas; não existe fallback para comparação em texto plano.
+- As respostas nunca incluem a senha ou seu hash.
+- Cadastro e login gravam o cookie de sessão `registro_session`, HttpOnly, SameSite=Strict e Secure em produção, com validade de 12 horas.
+- O token assinado contém o cuid do usuário. O servidor verifica assinatura, validade, existência do usuário e versão do hash da senha. Trocar senha ou SESSION_SECRET invalida sessões anteriores.
+- Logout expira o cookie. Tokens antigos do modelo de senha única não são aceitos.
+- O arquivo financeiro privado é separado por cuid. A autenticação de múltiplos usuários não abre acesso ao antigo arquivo global.
 
-1. Extraia este ZIP e substitua os arquivos do projeto pelos desta pasta. O arquivo `package.json` deve estar na raiz selecionada na Vercel. Substitua também `package-lock.json` e inclua `vercel.json`.
-2. Em **Settings → Build and Deployment**, configure:
-   - Framework Preset: **Next.js**.
-   - Build Command: **npm run build**.
-   - Install Command: **npm ci**.
-   - Output Directory: **.next** (ou deixe o padrão do Next.js, sem um override antigo como `dist`).
-   - Root Directory: a pasta que contém este `package.json`.
-3. Configure Node.js **22.x** ou **24.x**.
-4. Faça um novo deploy sem reutilizar o cache antigo de build.
+## Variáveis na Vercel
 
-Não envie a pasta `.next` manualmente: a Vercel a gera ao compilar. Não renomeie a pasta `dist` para `.next`; o conteúdo também precisa ser compatível.
-
-## Ativar login e salvamento
-
-O build e a demonstração funcionam sem credenciais. Para salvar dados reais:
-
-1. No painel da Vercel, abra **Storage**, crie um **Blob store com acesso Private** e conecte ao projeto. Use um armazenamento exclusivo para este aplicativo. Confirme que `BLOB_READ_WRITE_TOKEN` foi disponibilizado no ambiente Production.
-2. Em **Settings → Environment Variables**, adicione:
-
-| Variável | Valor |
+| Variável | Uso |
 | --- | --- |
-| `BLOB_READ_WRITE_TOKEN` | Token fornecido pela conexão com o Blob privado |
-| `APP_PASSWORD` | Sua senha pessoal, forte e exclusiva, com pelo menos 16 caracteres |
-| `SESSION_SECRET` | Segredo aleatório com pelo menos 32 caracteres |
+| `DATABASE_URL` | URL PostgreSQL fornecida pelo Neon, com SSL; use a conexão com pool recomendada pelo Neon para a aplicação |
+| `SESSION_SECRET` | Segredo aleatório de pelo menos 32 caracteres, somente no servidor |
+| `BLOB_READ_WRITE_TOKEN` | Token do Vercel Blob privado, para os registros financeiros já usados pelo aplicativo |
 
-Para gerar o segredo, execute localmente:
+`APP_PASSWORD` não é mais utilizada. Não use prefixo `NEXT_PUBLIC_` nas credenciais. Configure as variáveis nos ambientes desejados e faça um novo deploy. O cadastro de usuários utiliza o Neon; o armazenamento financeiro existente continua no Blob privado.
+
+Para gerar um novo segredo localmente:
 
 ```sh
 node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
 ```
 
-Não use prefixo `NEXT_PUBLIC_` nessas variáveis. Não inclua seus valores no repositório ou no ZIP. Após configurá-las, faça um novo deploy e entre em `/entrar` usando sua senha.
+O schema local foi alinhado à estrutura consultada no Neon; nenhuma alteração de tabela foi necessária. Não execute reset do banco. A chave única de e-mail protege cadastros concorrentes; conflitos são retornados como HTTP 409.
 
-Este app tem **um único espaço financeiro pessoal** por instalação. Quem souber a senha terá acesso a esse espaço. A sessão expira após 12 horas; trocar a senha ou o segredo invalida as sessões anteriores. Os dados ficam em um Blob privado e são acessados somente pelas rotas autenticadas. O modo demonstração não salva.
+## Deploy na Vercel
 
-O login inclui um limite local de tentativas por instância. Para limitar tentativas também entre instâncias, configure uma regra de rate limiting para `/api/auth/login` no Firewall da Vercel.
+- Framework: Next.js.
+- Build: `npm run build`.
+- Install: `npm ci` (o postinstall executa `prisma generate`).
+- Output: padrão `.next`.
+- Root Directory: pasta que contém `package.json`.
+- Node.js: 22.x ou 24.x.
 
-Se usar Preview, conecte outro armazenamento e outras credenciais para não misturar registros de testes com os seus dados de produção. A versão antiga com D1 não é migrada automaticamente.
+Envie os arquivos atualizados, inclusive `prisma/schema.prisma`, `package.json`, `package-lock.json` e as novas rotas. Não envie `.env`, `.env.local`, `node_modules` ou `.next`.
 
-## Rodar localmente
+## Desenvolvimento e testes
 
 ```sh
 npm ci
 npm run dev
-```
-
-Abra o endereço mostrado no terminal. Sem variáveis, a interface abre com dados fictícios. Para salvar, copie `.env.example` para `.env.local` e configure as três variáveis com um Blob privado de desenvolvimento.
-
-## Verificar
-
-```sh
 npm test
 npm run typecheck
 npm run build
 ```
 
-A correção foi validada por um build Next.js completo, com `.next/routes-manifest.json` gerado, e testes de sessão, parcelas, validação e armazenamento com SDK simulado. A conexão com um Blob real e o deploy na sua conta dependem da configuração acima e não foram executados neste ambiente.
+Use `.env.example` como modelo para sua configuração local. Os testes comuns usam um repositório de usuários simulado com Bcrypt real e não acessam o Neon.
 
-As gravações usam ETags para impedir que uma aba sobrescreva alterações de outra. Os valores permanecem em centavos inteiros. O saldo previsto considera os registros cadastrados; não é uma leitura do saldo bancário. As funcionalidades de cartões, parcelamento de 1 a 80 vezes, renda, categorias, reserva e projeções foram preservadas.
+O teste de integração explícito acessa o Neon configurado, cria uma conta fictícia em uma transação e reverte a transação, verificando que a conta não persistiu:
 
-## Referências oficiais
+```sh
+node --env-file=.env --env-file=.env.local tests/auth-neon.integration.mjs
+```
 
-- https://vercel.com/docs/frameworks/full-stack/nextjs
-- https://vercel.com/docs/vercel-blob/using-blob-sdk
+## Validação desta correção
+
+Oito testes passaram, cobrindo cadastro/login, hash Bcrypt, cookie, validação, duplicidade, corrida de cadastro, assinatura e expiração da sessão, cuid string, isolamento dos registros financeiros e cálculos de parcelas. O teste real com Neon também passou, sem deixar conta de teste salva. O build Next.js foi concluído com as três rotas de autenticação.
+
+Os dados financeiros do antigo arquivo único não são atribuídos automaticamente a uma conta: o código conserva esse arquivo sem expô-lo a usuários recém-cadastrados. Uma migração desses dados deve identificar explicitamente a conta proprietária.
