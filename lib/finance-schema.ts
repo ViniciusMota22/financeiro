@@ -1,0 +1,7 @@
+import {z} from 'zod';
+const month=z.string().regex(/^20\d{2}-(0[1-9]|1[0-2])$/);
+const date=z.string().regex(/^20\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/).refine(v=>new Date(v+'T12:00:00Z').toISOString().slice(0,10)===v);
+const cents=z.number().int().min(0).max(100000000000);
+const id=z.string().min(1).max(100);
+export const financeSchema=z.object({revision:z.string().max(256).nullable(),data:z.object({cards:z.array(z.object({id,bank:z.string().min(1).max(80),name:z.string().min(1).max(80),closing:z.number().int().min(1).max(31),due:z.number().int().min(1).max(31),limit:cents,color:z.string().regex(/^#[a-fA-F0-9]{6}$/)})).max(100),entries:z.array(z.object({id,name:z.string().min(1).max(120),description:z.string().max(1000),category:z.string().max(80),date,start:month,total:cents.refine(n=>n>0),installments:z.number().int().min(1).max(80),cardId:z.string().max(100),kind:z.enum(['expense','income']),recurring:z.boolean()})).max(10000),salary:cents,reserve:z.number().int().min(0).max(100),incomeStart:month,paid:z.array(z.string().max(130)).max(10000)})}).superRefine(({data},ctx)=>{const ids=new Set(data.cards.map(c=>c.id));if(ids.size!==data.cards.length||new Set(data.entries.map(e=>e.id)).size!==data.entries.length||data.entries.some(e=>(e.cardId&&!ids.has(e.cardId))||(e.kind==='income'&&e.cardId)||(e.recurring&&e.installments!==1)))ctx.addIssue({code:'custom',message:'Dados inconsistentes'});});
+
