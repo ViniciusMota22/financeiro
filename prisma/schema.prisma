@@ -12,17 +12,4 @@ model User {
   email    String @unique
   password String?
   googleId String? @unique
-  passwordResetTokens PasswordResetToken[]
-}
-
-model PasswordResetToken {
-  id        String   @id @default(cuid())
-  tokenHash String   @unique
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([expiresAt])
 }
