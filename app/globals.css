@@ -119,3 +119,20 @@ body{font-family:Inter,'Segoe UI',sans-serif;color:#22263a;background:#f7f8fc}bu
 .dark .border-slate-200,.dark .border-slate-100{border-color:#334155!important}
 .dark input,.dark select,.dark textarea{background:#0f172a!important;color:#e2e8f0!important;border-color:#334155!important}
 .dark .shadow,.dark .shadow-lg,.dark .shadow-2xl{box-shadow:0 18px 50px #02061780!important}
+
+/* O tema usa uma classe no próprio aplicativo para garantir a mudança visual imediata. */
+.finance-app.theme-dark{background:#0b1220!important;color:#e8edf7!important}
+.finance-app.theme-dark :is(aside,header,section,article,nav) .bg-white,
+.finance-app.theme-dark :is(aside,header,section,article,nav).bg-white,
+.finance-app.theme-dark :is(aside,header,section,article,nav).bg-white\/90{background-color:#172033!important;color:#e8edf7}
+.finance-app.theme-dark :is(.bg-slate-50,.bg-slate-100){background-color:#233047!important}
+.finance-app.theme-dark :is(.text-slate-900,.text-slate-800,.text-slate-700){color:#e8edf7!important}
+.finance-app.theme-dark :is(.text-slate-600,.text-slate-500,.text-slate-400){color:#aebbd0!important}
+.finance-app.theme-dark :is(.border-slate-100,.border-slate-200){border-color:#37465d!important}
+.finance-app.theme-dark :is(input,select,textarea){background:#111a2b!important;color:#f0f4fc!important;border-color:#465773!important}
+.finance-app.theme-dark input::placeholder{color:#95a5bc!important}
+.finance-app.theme-dark .bg-indigo-50{background:#28315c!important}
+.finance-app.theme-dark .text-indigo-700{color:#c5caff!important}
+.finance-app.theme-dark .bg-emerald-50{background:#11382f!important}
+.finance-app.theme-dark .bg-red-50{background:#44222b!important}
+.finance-app.theme-dark .bg-amber-50{background:#47371d!important}

@@ -2,9 +2,9 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Registro financeiro",
+  title: "Registro Financeiro | Gestão Pessoal",
   description: "Cartões, parcelas e planejamento financeiro em um só lugar.",
-  applicationName: "Registro Financeiro",
+  applicationName: "Registro Financeiro | Gestão Pessoal",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",

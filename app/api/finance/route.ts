@@ -9,7 +9,7 @@ export async function GET(){
     const user=await getSessionUser();
     if(!user)return response({error:'Entre para acessar seus registros.'},401);
     if(!process.env.BLOB_READ_WRITE_TOKEN)return response({error:'O armazenamento ainda não foi conectado. Configure o Vercel Blob privado antes de salvar registros.'},503);
-    return response(await createFinanceStore(user.id).read());
+    return response({...await createFinanceStore(user.id).read(),userId:user.id});
   }catch(e){console.error('finance load:',e instanceof Error?e.name:'UnknownError');return response({error:'Não foi possível carregar seus registros. Tente novamente.'},503);}
 }
 export async function PUT(request:Request){

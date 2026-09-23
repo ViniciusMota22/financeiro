@@ -5,6 +5,8 @@ import {amountAt,addMonths,firstInvoice,summary,demoState,emptyState,normalizeSt
 import {financeSchema} from '../lib/finance-schema.ts';
 import {createFinanceStore} from '../lib/finance-store.ts';
 import {parseStatement} from '../lib/statement-import.ts';
+import {mergeOffline} from '../lib/offline-merge.ts';
+import {reminders} from '../lib/reminders.ts';
 const password='synthetic-password-for-tests';const secret='synthetic-secret-at-least-32-characters';
 
 test('installments preserve cents over 80 months and year boundaries',()=>{
@@ -30,6 +32,29 @@ test('OFX and CSV statement imports preserve dates, cents and transaction direct
  const fromOfx=parseStatement(ofx,'extrato.ofx');assert.equal(fromOfx.length,2);assert.deepEqual(fromOfx.map(x=>[x.date,x.total,x.kind,x.method]),[['2026-09-23',1234,'expense','pix'],['2026-09-24',8050,'income','pix']]);
  const csv='Data;Descrição;Valor\n23/09/2026;Compra no cartão;-1.234,56\n24/09/2026;PIX recebido;90,00';
  const fromCsv=parseStatement(csv,'extrato.csv');assert.equal(fromCsv.length,2);assert.deepEqual(fromCsv.map(x=>[x.total,x.kind]),[[123456,'expense'],[9000,'income']]);
+ assert.equal(fromCsv[0].category,'Compras');
+ assert.equal(fromCsv[1].method,'pix');
+ assert.notEqual(fromCsv[0].importKey,fromCsv[1].importKey);
+});
+test('offline reconciliation keeps independent server and local changes',()=>{
+ const base=demoState('2026-09');
+ const local={...base,entries:[...base.entries,{...base.entries[0],id:'local-entry',name:'Compra offline'}]};
+ const remote={...base,entries:[...base.entries,{...base.entries[0],id:'remote-entry',name:'Compra de outra aba'}]};
+ const merged=mergeOffline(base,local,remote);
+ assert.equal(merged.entries.length,base.entries.length+2);
+ assert.ok(merged.entries.some(entry=>entry.id==='local-entry'));
+ assert.ok(merged.entries.some(entry=>entry.id==='remote-entry'));
+});
+test('reminders include negative balance, upcoming invoice, budget and overdue goal',()=>{
+ const state=demoState('2026-09');state.salary=0;
+ const alerts=reminders(state,'2026-09','2026-09-24');
+ assert.ok(alerts.some(alert=>alert.id==='negative'&&alert.severity==='danger'));
+ assert.ok(alerts.some(alert=>alert.id==='card:nu:fechamento'));
+ assert.ok(alerts.some(alert=>alert.id.startsWith('budget:'))===false);
+ state.budgets[0].category='Casa';state.budgets[0].limit=100000;
+ assert.ok(reminders(state,'2026-09','2026-09-24').some(alert=>alert.id==='budget:b1'));
+ state.goals[0].deadline='2026-08';
+ assert.ok(reminders(state,'2026-09','2026-09-24').some(alert=>alert.id==='goal:g1'));
 });
 test('private storage read/write, overwrite, and unavailable storage',async()=>{
  process.env.BLOB_READ_WRITE_TOKEN='synthetic-token-used-only-by-test-double';
