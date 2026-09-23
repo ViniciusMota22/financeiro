@@ -4,10 +4,12 @@ export const SESSION_SECONDS=60*60*12;
 export const isUserId=(value:unknown):value is string=>typeof value==='string'&&/^c[a-z0-9]{24}$/.test(value);
 export function sessionSecret(){const secret=process.env.SESSION_SECRET;return secret&&secret.length>=32?secret:null;}
 function sign(value:string,secret:string){return createHmac('sha256',secret).update(value).digest('base64url');}
-export function passwordVersion(passwordHash:string,secret:string){return sign(`password:${passwordHash}`,secret);}
-export function issueSession(user:{id:string;password:string},secret:string,now=Date.now()){
+export function accountVersion(user:{password:string|null;googleId?:string|null},secret:string){return sign(`account:${user.password??''}:${user.googleId??''}`,secret);}
+// Mantido para compatibilidade com testes e sessões baseadas apenas em senha.
+export function passwordVersion(passwordHash:string,secret:string){return accountVersion({password:passwordHash},secret);}
+export function issueSession(user:{id:string;password:string|null;googleId?:string|null},secret:string,now=Date.now()){
   if(!isUserId(user.id)||secret.length<32)throw new Error('Invalid session configuration');
-  const body=Buffer.from(JSON.stringify({v:2,sub:user.id,exp:Math.floor(now/1000)+SESSION_SECONDS,pv:passwordVersion(user.password,secret),nonce:randomBytes(16).toString('hex')})).toString('base64url');
+  const body=Buffer.from(JSON.stringify({v:2,sub:user.id,exp:Math.floor(now/1000)+SESSION_SECONDS,pv:accountVersion(user,secret),nonce:randomBytes(16).toString('hex')})).toString('base64url');
   return `${body}.${sign(body,secret)}`;
 }
 export function verifySession(token:string,secret:string,now=Date.now()):{userId:string;passwordVersion:string}|null{
