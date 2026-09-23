@@ -5,7 +5,7 @@ type Mode="login"|"register";
 export default function EntrarPage(){
  const [mode,setMode]=useState<Mode>("login"),[email,setEmail]=useState(""),[password,setPassword]=useState(""),[error,setError]=useState(""),[loading,setLoading]=useState(false);const router=useRouter();
  const changeMode=(next:Mode)=>{setMode(next);setPassword("");setError("");};
- useEffect(()=>{if(new URLSearchParams(window.location.search).get('google')==='erro')setError('Não foi possível entrar com o Google. Tente novamente.');},[]);
+ useEffect(()=>{if(new URLSearchParams(window.location.search).get('google')==='erro')queueMicrotask(()=>setError('Não foi possível entrar com o Google. Tente novamente.'));},[]);
  async function submit(e:React.FormEvent){e.preventDefault();setError("");setLoading(true);const endpoint=mode==="login"?"/api/auth/login":"/api/auth/register";try{const res=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,password})});const data=await res.json();if(!res.ok)setError(data.error||"Ocorreu um erro. Tente novamente.");else{router.replace("/");router.refresh();}}catch{setError("Erro de conexão. Verifique sua internet.");}finally{setLoading(false);}}
  const title=mode==="login"?"Seu espaço financeiro":"Criar nova conta",subtitle=mode==="login"?"Entre com seu e-mail e senha.":"Cadastre-se para salvar seus registros.";
  return <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 px-4"><div className="p-8 bg-white rounded-xl shadow-md max-w-sm w-full">

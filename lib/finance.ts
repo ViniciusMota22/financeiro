@@ -1,14 +1,15 @@
 export type PaymentMethod='credit_card'|'pix'|'pix_credit'|'debit_card'|'cash'|'bank_transfer'|'boleto'|'other';
 export type Card={id:string;bank:string;name:string;closing:number;due:number;limit:number;color:string};
-export type Entry={id:string;name:string;description:string;category:string;date:string;start:string;total:number;installments:number;cardId:string;kind:'expense'|'income';recurring:boolean;method:PaymentMethod;borrower:string;subscription:boolean};
+export type Entry={id:string;name:string;description:string;category:string;date:string;start:string;total:number;installments:number;cardId:string;kind:'expense'|'income';recurring:boolean;method:PaymentMethod;borrower:string;subscription:boolean;tags?:string[]};
 export type Budget={id:string;category:string;limit:number};
 export type Goal={id:string;name:string;target:number;saved:number;deadline:string;kind:'goal'|'emergency'};
-export type State={cards:Card[];entries:Entry[];salary:number;reserve:number;incomeStart:string;paid:string[];budgets:Budget[];goals:Goal[]};
-export const emptyState:State={cards:[],entries:[],salary:0,reserve:50,incomeStart:'2026-09',paid:[],budgets:[],goals:[]};
+export type Debt={id:string;name:string;balance:number;interest:number;installment:number;remaining:number;dueDay:number};
+export type State={cards:Card[];entries:Entry[];salary:number;reserve:number;incomeStart:string;paid:string[];budgets:Budget[];goals:Goal[];debts:Debt[];customCategories:string[]};
+export const emptyState:State={cards:[],entries:[],salary:0,reserve:50,incomeStart:'2026-09',paid:[],budgets:[],goals:[],debts:[],customCategories:[]};
 export const banks:Record<string,string>={'Nubank':'#820ad1','PicPay':'#11c76f','Banco do Brasil':'#f8d117','Caixa Econômica Federal':'#0879c9','Santander':'#ec0000','Itaú':'#ec7000','Bradesco':'#cc092f','Inter':'#ff7a00','C6 Bank':'#242424','BTG Pactual':'#15355e','Mercado Pago':'#00a8e7','Neon':'#00e5b0','Sicredi':'#3fae2a','Sicoob':'#137b43','Banrisul':'#0062a9','Outro':'#5269e7'};
 export const categories=['Alimentação','Compras','Casa','Transporte','Saúde','Lazer','Educação','Assinaturas','Impostos','Investimentos','Pets','Outros'];
 export const methodLabels:Record<PaymentMethod,string>={credit_card:'Cartão de crédito',pix:'Pix',pix_credit:'Pix Crédito',debit_card:'Cartão de débito',cash:'Dinheiro',bank_transfer:'Transferência',boleto:'Boleto',other:'Outro'};
-export function normalizeState(value:Partial<State>):State{return {...emptyState,...value,cards:value.cards??[],entries:(value.entries??[]).map(e=>({...e,method:e.method??(e.cardId?'credit_card':'other'),borrower:e.borrower??'',subscription:e.subscription??(e.recurring&&e.category==='Assinaturas')})),budgets:value.budgets??[],goals:value.goals??[]};}
+export function normalizeState(value:Partial<State>):State{return {...emptyState,...value,cards:value.cards??[],entries:(value.entries??[]).map(e=>({...e,method:e.method??(e.cardId?'credit_card':'other'),borrower:e.borrower??'',subscription:e.subscription??(e.recurring&&e.category==='Assinaturas'),tags:e.tags??[]})),budgets:value.budgets??[],goals:value.goals??[],debts:value.debts??[],customCategories:value.customCategories??[]};}
 export function monthIndex(s:string){const [y,m]=s.split('-').map(Number);return y*12+m-1;}
 export function addMonths(s:string,n:number){const i=monthIndex(s)+n;return `${Math.floor(i/12)}-${String(i%12+1).padStart(2,'0')}`;}
 export function firstInvoice(date:string,card:Card){return addMonths(date.slice(0,7),(Number(date.slice(8,10))>=card.closing?1:0)+(card.due<=card.closing?1:0));}

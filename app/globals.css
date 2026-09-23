@@ -108,3 +108,14 @@ body{font-family:Inter,'Segoe UI',sans-serif;color:#22263a;background:#f7f8fc}bu
 .bank-top b,.bank-card>p,.card-footer,.card-meta,.allocation,.category-row>div,.category-row b,.ledger-panel td,.entry-title b,.bank-badge,.month-picker,.section-heading button{font-size:14px}.cell-sub,.entry-title small,.allocation small,.chart-foot,.page-footer,.rail-bottom p,.profile small,.categories-panel>.muted-note,.card-details p,.form-note{font-size:12px}.metric small{font-size:12px}.bank-card>strong{font-size:26px}.cards-grid .bank-top{flex-wrap:wrap}.card-footer{align-items:flex-start;flex-wrap:wrap}.bank-top b{max-width:calc(100% - 72px);overflow-wrap:anywhere}.entry-title small{max-width:195px}.rail-settings,.rail nav button{font-size:14px}.check-field,.field,.secondary,.form-estimate{font-size:14px}.bank-card .card-meta{gap:10px}.add-card b{font-size:14px}.add-card small{font-size:12px}.metric strong{font-variant-numeric:tabular-nums}
 
 .login-page{min-height:100dvh;display:grid;place-items:center;padding:24px}.login-card{width:100%;max-width:430px;background:white;border:1px solid #e5e9f3;border-radius:18px;padding:36px;box-shadow:0 14px 50px #3a4c7c09}.login-card .brand{margin:0 0 38px}.login-symbol{color:#5269e7;background:#edf1ff;padding:12px;display:inline-flex;border-radius:12px;margin-bottom:16px}.login-card h1{font-size:25px;margin-bottom:8px}.login-card>p{color:#7c879e;font-size:15px;line-height:1.6}.login-card form{display:flex;flex-direction:column;gap:18px;margin:25px 0}.login-card .primary{width:100%}.login-error{color:#b83f3f;font-size:14px;line-height:1.5}
+
+/* Tema escuro aplicado pelo controle do cabeçalho. */
+.dark body{background:#0f172a;color:#e2e8f0}
+.dark .bg-white,.dark .bg-white\/90{background-color:#111827!important}
+.dark .bg-slate-50,.dark .bg-slate-100{background-color:#1e293b!important}
+.dark .bg-\[\#f6f8fc\]{background-color:#0f172a!important}
+.dark .text-slate-900,.dark .text-slate-800,.dark .text-slate-700{color:#e2e8f0!important}
+.dark .text-slate-600,.dark .text-slate-500,.dark .text-slate-400{color:#94a3b8!important}
+.dark .border-slate-200,.dark .border-slate-100{border-color:#334155!important}
+.dark input,.dark select,.dark textarea{background:#0f172a!important;color:#e2e8f0!important;border-color:#334155!important}
+.dark .shadow,.dark .shadow-lg,.dark .shadow-2xl{box-shadow:0 18px 50px #02061780!important}

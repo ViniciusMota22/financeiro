@@ -1,13 +1,24 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Registro financeiro",
   description: "Cartões, parcelas e planejamento financeiro em um só lugar.",
+  applicationName: "Registro Financeiro",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Registro Financeiro",
+  },
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#4f46e5",
+  colorScheme: "light dark",
 };
 
 export default function RootLayout({

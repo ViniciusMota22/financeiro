@@ -1,5 +1,5 @@
 import {getSessionUser,isSameOrigin} from '@/lib/auth';
-import {createFinanceStore,RevisionConflict} from '@/lib/finance-store';
+import {createFinanceStore} from '@/lib/finance-store';
 import {financeSchema} from '@/lib/finance-schema';
 export const dynamic='force-dynamic';
 export const runtime='nodejs';
@@ -23,5 +23,5 @@ export async function PUT(request:Request){
     const parsed=financeSchema.safeParse(body);
     if(!parsed.success)return response({error:'Confira os valores e as datas informados.'},400);
     return response({revision:await createFinanceStore(user.id).write(parsed.data.data,parsed.data.revision)});
-  }catch(e){if(e instanceof RevisionConflict)return response({error:e.message},409);console.error('finance save:',e instanceof Error?e.name:'UnknownError');return response({error:'Não foi possível salvar. Seus campos foram preservados; tente novamente.'},503);}
+  }catch(e){console.error('finance save:',e instanceof Error?e.name:'UnknownError');return response({error:'Não foi possível salvar. Seus campos foram preservados; tente novamente.'},503);}
 }
