@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {issueSession,verifySession,SESSION_SECONDS} from '../lib/session-token.ts';
-import {amountAt,addMonths,firstInvoice,summary,demoState,emptyState} from '../lib/finance.ts';
+import {amountAt,addMonths,firstInvoice,summary,demoState,emptyState,normalizeState} from '../lib/finance.ts';
 import {financeSchema} from '../lib/finance-schema.ts';
 import {createFinanceStore,RevisionConflict} from '../lib/finance-store.ts';
 import {BlobPreconditionFailedError} from '@vercel/blob';
@@ -18,6 +18,12 @@ test('invalid dates and orphan cards are rejected',()=>{
  assert.equal(financeSchema.safeParse({data:{...data,entries:[{...data.entries[0],date:'2026-02-31'}]},revision:null}).success,false);
  assert.equal(financeSchema.safeParse({data:{...data,cards:[]},revision:null}).success,false);
  assert.equal(financeSchema.safeParse({data,revision:0}).success,false);
+});
+test('legacy data is upgraded and Pix Crédito and borrowed-card purchases are preserved',()=>{
+ const old=demoState('2026-09');delete old.budgets;delete old.goals;for(const entry of old.entries){delete entry.method;delete entry.borrower;delete entry.subscription;}
+ const upgraded=normalizeState(old);assert.deepEqual(upgraded.budgets,[]);assert.deepEqual(upgraded.goals,[]);assert.equal(upgraded.entries[0].method,'credit_card');
+ const pixCredit={...upgraded.entries[0],id:'pix-credit',cardId:'',method:'pix_credit',borrower:'Carlos',installments:18,total:180001,start:'2026-09'};
+ const parsed=financeSchema.safeParse({revision:null,data:{...upgraded,entries:[...upgraded.entries,pixCredit]}});assert.equal(parsed.success,true);assert.equal(amountAt(pixCredit,'2026-09')+amountAt(pixCredit,'2026-10')*17,180001);
 });
 test('private storage read/write, conditional concurrency, and unavailable storage',async()=>{
  process.env.BLOB_READ_WRITE_TOKEN='synthetic-token-used-only-by-test-double';
