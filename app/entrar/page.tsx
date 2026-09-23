@@ -1,109 +1,20 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-
-export default function EntrarPage() {
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register";
-    
-    try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (res.ok) {
-        // Sucesso! Vai para a página inicial
-        router.replace("/");
-        router.refresh();
-      } else {
-        const data = await res.json();
-        setError(data.error || "Ocorreu um erro. Tente novamente.");
-      }
-    } catch (err) {
-      setError("Erro de conexão. Verifique sua internet.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50">
-      <div className="p-8 bg-white rounded-xl shadow-md max-w-sm w-full">
-        <div className="flex justify-center mb-6">
-          <div className="bg-blue-100 p-3 rounded-xl">
-            <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7a4 4 0 00-8 0v4h8z" /></svg>
-          </div>
-        </div>
-
-        <h2 className="text-2xl font-bold mb-2 text-center text-slate-900">
-          {isLogin ? "Seu espaço financeiro" : "Criar nova conta"}
-        </h2>
-        <p className="text-slate-500 mb-6 text-sm text-center">
-          {isLogin ? "Entre com seu e-mail e senha." : "Cadastre-se para salvar seus registros."}
-        </p>
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div>
-            <label htmlFor="email" className="text-sm font-medium text-slate-700">Seu e-mail</label>
-            <input 
-              id="email" autoComplete="email" maxLength={254} type="email" 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-slate-300 rounded-lg p-2.5 mt-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" 
-              placeholder="seu@email.com"
-              required 
-            />
-          </div>
-          
-          <div>
-            <label htmlFor="password" className="text-sm font-medium text-slate-700">Sua senha</label>
-            <input 
-              id="password" autoComplete={isLogin ? "current-password" : "new-password"} minLength={isLogin ? 1 : 8} maxLength={72} type="password" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-slate-300 rounded-lg p-2.5 mt-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" 
-              placeholder="••••••••"
-              required 
-            />
-          </div>
-
-          {!isLogin && <p className="text-sm text-slate-500">Use pelo menos 8 caracteres. Limite de 72 bytes (acentos e emojis podem ocupar mais de um byte).</p>}
-          {error && <p role="alert" className="text-red-500 text-sm font-medium text-center">{error}</p>}
-
-          <button 
-            type="submit" 
-            disabled={loading}
-            className="w-full bg-blue-600 text-white font-medium rounded-lg p-2.5 mt-2 hover:bg-blue-700 transition-colors disabled:opacity-70"
-          >
-            {loading ? "Aguarde..." : (isLogin ? "Entrar" : "Criar conta")}
-          </button>
-        </form>
-
-        <button 
-          disabled={loading}
-          onClick={() => {
-            setIsLogin(!isLogin);
-            setPassword("");
-            setError("");
-          }} 
-          className="text-blue-600 text-sm mt-6 w-full text-center hover:underline font-medium"
-        >
-          {isLogin ? "Não tem uma conta? Crie uma" : "Já tem conta? Faça login"}
-        </button>
-      </div>
-    </div>
-  );
+import {useState} from "react";
+import {useRouter} from "next/navigation";
+type Mode="login"|"register"|"forgot";
+export default function EntrarPage(){
+ const [mode,setMode]=useState<Mode>("login"),[email,setEmail]=useState(""),[password,setPassword]=useState(""),[error,setError]=useState(""),[message,setMessage]=useState(""),[loading,setLoading]=useState(false);const router=useRouter();
+ const changeMode=(next:Mode)=>{setMode(next);setPassword("");setError("");setMessage("");};
+ async function submit(e:React.FormEvent){e.preventDefault();setError("");setMessage("");setLoading(true);const endpoint=mode==="forgot"?"/api/auth/forgot-password":mode==="login"?"/api/auth/login":"/api/auth/register";try{const res=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(mode==="forgot"?{email}:{email,password})});const data=await res.json();if(!res.ok)setError(data.error||"Ocorreu um erro. Tente novamente.");else if(mode==="forgot")setMessage(data.message);else{router.replace("/");router.refresh();}}catch{setError("Erro de conexão. Verifique sua internet.");}finally{setLoading(false);}}
+ const title=mode==="forgot"?"Esqueci minha senha":mode==="login"?"Seu espaço financeiro":"Criar nova conta",subtitle=mode==="forgot"?"Informe seu e-mail para receber o link de redefinição.":mode==="login"?"Entre com seu e-mail e senha.":"Cadastre-se para salvar seus registros.";
+ return <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 px-4"><div className="p-8 bg-white rounded-xl shadow-md max-w-sm w-full">
+  <div className="flex justify-center mb-6"><div className="bg-blue-100 p-3 rounded-xl"><svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg></div></div>
+  <h2 className="text-2xl font-bold mb-2 text-center text-slate-900">{title}</h2><p className="text-slate-500 mb-6 text-sm text-center">{subtitle}</p>
+  <form onSubmit={submit} className="flex flex-col gap-4"><div><label htmlFor="email" className="text-sm font-medium text-slate-700">Seu e-mail</label><input id="email" autoComplete="email" maxLength={254} type="email" value={email} onChange={e=>setEmail(e.target.value)} className="w-full border border-slate-300 rounded-lg p-2.5 mt-1 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="seu@email.com" required/></div>
+  {mode!=="forgot"&&<div><label htmlFor="password" className="text-sm font-medium text-slate-700">Sua senha</label><input id="password" autoComplete={mode==="login"?"current-password":"new-password"} minLength={mode==="login"?1:8} maxLength={72} type="password" value={password} onChange={e=>setPassword(e.target.value)} className="w-full border border-slate-300 rounded-lg p-2.5 mt-1 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="••••••••" required/></div>}
+  {mode==="register"&&<p className="text-sm text-slate-500">Use pelo menos 8 caracteres.</p>}{error&&<p role="alert" className="text-red-500 text-sm font-medium text-center">{error}</p>}{message&&<p role="status" className="text-green-700 text-sm font-medium text-center">{message}</p>}
+  <button type="submit" disabled={loading||Boolean(message)} className="w-full bg-blue-600 text-white font-medium rounded-lg p-2.5 mt-2 hover:bg-blue-700 disabled:opacity-70">{loading?"Aguarde...":mode==="forgot"?"Enviar link":mode==="login"?"Entrar":"Criar conta"}</button></form>
+  {mode==="login"&&<button disabled={loading} onClick={()=>changeMode("forgot")} className="text-blue-600 text-sm mt-4 w-full text-center hover:underline font-medium">Esqueci minha senha</button>}
+  <button disabled={loading} onClick={()=>changeMode(mode==="login"?"register":"login")} className="text-blue-600 text-sm mt-4 w-full text-center hover:underline font-medium">{mode==="login"?"Não tem uma conta? Crie uma":mode==="register"?"Já tem conta? Faça login":"Voltar para o login"}</button>
+ </div></div>;
 }

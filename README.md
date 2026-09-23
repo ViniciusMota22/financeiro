@@ -20,8 +20,14 @@
 | `DATABASE_URL` | URL PostgreSQL fornecida pelo Neon, com SSL; use a conexão com pool recomendada pelo Neon para a aplicação |
 | `SESSION_SECRET` | Segredo aleatório de pelo menos 32 caracteres, somente no servidor |
 | `BLOB_READ_WRITE_TOKEN` | Token do Vercel Blob privado, para os registros financeiros já usados pelo aplicativo |
+| `RESEND_API_KEY` | Chave da API Resend usada somente no servidor para enviar o link de redefinição |
+| `PASSWORD_RESET_FROM_EMAIL` | Remetente verificado, por exemplo `Registro Financeiro <contato@seudominio.com>` |
 
 `APP_PASSWORD` não é mais utilizada. Não use prefixo `NEXT_PUBLIC_` nas credenciais. Configure as variáveis nos ambientes desejados e faça um novo deploy. O cadastro de usuários utiliza o Neon; o armazenamento financeiro existente continua no Blob privado.
+
+## Redefinição de senha
+
+Execute `prisma/password-reset.sql` uma vez no SQL Editor do Neon. Depois configure `RESEND_API_KEY` e `PASSWORD_RESET_FROM_EMAIL` na Vercel. O link enviado expira em 30 minutos, guarda apenas o hash do token no banco e deixa de funcionar depois do primeiro uso. A resposta da solicitação é igual para e-mails cadastrados e desconhecidos.
 
 Para gerar um novo segredo localmente:
 
