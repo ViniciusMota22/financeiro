@@ -7,6 +7,7 @@ import {createFinanceStore} from '../lib/finance-store.ts';
 import {parseStatement} from '../lib/statement-import.ts';
 import {mergeOffline} from '../lib/offline-merge.ts';
 import {reminders} from '../lib/reminders.ts';
+import {dailyExpenseComparison,expenseCategories} from '../lib/financial-insights.ts';
 const password='synthetic-password-for-tests';const secret='synthetic-secret-at-least-32-characters';
 
 test('installments preserve cents over 80 months and year boundaries',()=>{
@@ -15,6 +16,26 @@ test('installments preserve cents over 80 months and year boundaries',()=>{
  const card=demoState('2026-09').cards[0];assert.equal(firstInvoice('2026-12-26',card),'2027-02');
  assert.equal(summary({...demoState('2026-09'),salary:0},'2026-09').investment,0);
 });
+test('detailed reports use installment amounts and card due dates without inventing bank balances',()=>{
+ const state=demoState('2026-09');
+ const categories=expenseCategories(state,'2026-09');
+ assert.equal(categories.find(item=>item.name==='Educação').value,40000);
+ assert.equal(expenseCategories(state,'2026-09','recurring').find(item=>item.name==='Casa').value,150000);
+ const timeline=dailyExpenseComparison(state,'2026-09');
+ assert.equal(timeline.length,30);
+ assert.equal(timeline[3].current,0);
+ assert.equal(timeline[4].current,230000);
+ assert.equal(timeline.at(-1).current,summary(state,'2026-09').expense);
+ assert.equal(timeline.at(-1).previous,summary(state,'2026-08').expense);
+});
+test('manual bank balances remain separate from projected cash flow and merge offline',()=>{
+ const base=demoState('2026-09');
+ const account={id:'manual-account',bank:'Nubank',name:'Principal',balance:-12500,color:'#820ad1',updatedAt:'2026-09-25'};
+ const local={...base,accounts:[account]};
+ assert.equal(financeSchema.safeParse({revision:null,data:local}).success,true);
+ assert.equal(summary(local,'2026-09').balance,summary(base,'2026-09').balance);
+ assert.deepEqual(mergeOffline(base,local,base).accounts,[account]);
+});
 test('invalid dates and orphan cards are rejected',()=>{
  const data=demoState('2026-09');assert.equal(financeSchema.safeParse({data,revision:null}).success,true);
  assert.equal(financeSchema.safeParse({data:{...data,entries:[{...data.entries[0],date:'2026-02-31'}]},revision:null}).success,false);
@@ -22,8 +43,8 @@ test('invalid dates and orphan cards are rejected',()=>{
  assert.equal(financeSchema.safeParse({data,revision:0}).success,false);
 });
 test('legacy data is upgraded and Pix Crédito and borrowed-card purchases are preserved',()=>{
- const old=demoState('2026-09');delete old.budgets;delete old.goals;delete old.debts;delete old.customCategories;for(const entry of old.entries){delete entry.method;delete entry.borrower;delete entry.subscription;delete entry.tags;}
- const upgraded=normalizeState(old);assert.deepEqual(upgraded.budgets,[]);assert.deepEqual(upgraded.goals,[]);assert.deepEqual(upgraded.debts,[]);assert.deepEqual(upgraded.customCategories,[]);assert.deepEqual(upgraded.entries[0].tags,[]);assert.equal(upgraded.entries[0].method,'credit_card');
+ const old=demoState('2026-09');delete old.accounts;delete old.budgets;delete old.goals;delete old.debts;delete old.customCategories;for(const entry of old.entries){delete entry.method;delete entry.borrower;delete entry.subscription;delete entry.tags;}
+ const upgraded=normalizeState(old);assert.deepEqual(upgraded.accounts,[]);assert.deepEqual(upgraded.budgets,[]);assert.deepEqual(upgraded.goals,[]);assert.deepEqual(upgraded.debts,[]);assert.deepEqual(upgraded.customCategories,[]);assert.deepEqual(upgraded.entries[0].tags,[]);assert.equal(upgraded.entries[0].method,'credit_card');
  const pixCredit={...upgraded.entries[0],id:'pix-credit',cardId:'',method:'pix_credit',borrower:'Carlos',installments:18,total:180001,start:'2026-09'};
  const parsed=financeSchema.safeParse({revision:null,data:{...upgraded,entries:[...upgraded.entries,pixCredit]}});assert.equal(parsed.success,true);assert.equal(amountAt(pixCredit,'2026-09')+amountAt(pixCredit,'2026-10')*17,180001);
 });

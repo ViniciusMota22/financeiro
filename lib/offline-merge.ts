@@ -12,6 +12,7 @@ export function mergeOffline(base:State,local:State,remote:State):State{
  return {
   ...remote,
   cards:mergeById(base.cards,local.cards,remote.cards),
+  accounts:mergeById(base.accounts,local.accounts,remote.accounts),
   entries:mergeById(base.entries,local.entries,remote.entries),
   budgets:mergeById(base.budgets,local.budgets,remote.budgets),
   goals:mergeById(base.goals,local.goals,remote.goals),
