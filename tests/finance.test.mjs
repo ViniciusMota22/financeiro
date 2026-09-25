@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {issueSession,verifySession,SESSION_SECONDS} from '../lib/session-token.ts';
-import {amountAt,addMonths,firstInvoice,summary,demoState,emptyState,normalizeState} from '../lib/finance.ts';
+import {amountAt,addMonths,firstInvoice,nextInvoiceMonth,purchasesInMonth,invoicesInMonth,upsertCard,withoutCustomCategory,summary,demoState,emptyState,normalizeState} from '../lib/finance.ts';
 import {financeSchema} from '../lib/finance-schema.ts';
 import {createFinanceStore} from '../lib/finance-store.ts';
 import {parseStatement} from '../lib/statement-import.ts';
@@ -15,6 +15,30 @@ test('installments preserve cents over 80 months and year boundaries',()=>{
  for(const count of [1,3,12,80]){const e={...base,total:80001,installments:count,start:'2026-12'};let total=0;for(let i=0;i<count;i++)total+=amountAt(e,addMonths(e.start,i));assert.equal(total,80001);assert.equal(amountAt(e,addMonths(e.start,count)),0);}
  const card=demoState('2026-09').cards[0];assert.equal(firstInvoice('2026-12-26',card),'2027-02');
  assert.equal(summary({...demoState('2026-09'),salary:0},'2026-09').investment,0);
+});
+test('closing on 27 and due on 5 assigns purchases to the payable invoice',()=>{
+ const card={id:'c',bank:'Nubank',name:'',closing:27,due:5,limit:100000,color:'#820ad1'};
+ assert.equal(firstInvoice('2026-09-18',card),'2026-10');
+ assert.equal(firstInvoice('2026-09-27',card),'2026-11');
+ assert.equal(firstInvoice('2026-09-28',card),'2026-11');
+ assert.equal(nextInvoiceMonth('2026-09-18',5),'2026-10');
+ assert.equal(nextInvoiceMonth('2026-10-01',5),'2026-10');
+ assert.equal(nextInvoiceMonth('2026-10-06',5),'2026-11');
+ const entry={...demoState('2026-09').entries[0],id:'sep18',date:'2026-09-18',start:firstInvoice('2026-09-18',card),cardId:card.id,total:12345,installments:1};
+ const state={...emptyState,cards:[card],entries:[entry]};
+ assert.deepEqual(purchasesInMonth(state,'2026-09').map(item=>item.id),['sep18']);
+ assert.equal(invoicesInMonth(state,'2026-09').length,0);
+ assert.deepEqual(invoicesInMonth(state,'2026-10').map(item=>item.id),['sep18']);
+ const revised=upsertCard(state,{...card,closing:15});
+ assert.equal(revised.entries[0].start,'2026-11');
+});
+test('removing a custom category preserves purchases and moves them to Outros',()=>{
+ const original=demoState('2026-09');const state={...original,customCategories:['Reforma'],entries:[{...original.entries[0],category:'Reforma'}],budgets:[{id:'b',category:'Reforma',limit:10000}]};
+ const result=withoutCustomCategory(state,'Reforma');
+ assert.equal(result.entries[0].total,state.entries[0].total);
+ assert.equal(result.entries[0].category,'Outros');
+ assert.deepEqual(result.customCategories,[]);
+ assert.deepEqual(result.budgets,[]);
 });
 test('detailed reports use installment amounts and card due dates without inventing bank balances',()=>{
  const state=demoState('2026-09');
