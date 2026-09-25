@@ -14,7 +14,13 @@ export function normalizeState(value:Partial<State>):State{return {...emptyState
 export function monthIndex(s:string){const [y,m]=s.split('-').map(Number);return y*12+m-1;}
 export function addMonths(s:string,n:number){const i=monthIndex(s)+n;return `${Math.floor(i/12)}-${String(i%12+1).padStart(2,'0')}`;}
 export function firstInvoice(date:string,card:Card){return addMonths(date.slice(0,7),(Number(date.slice(8,10))>=card.closing?1:0)+(card.due<=card.closing?1:0));}
+/** The first invoice whose due date has not yet passed; independent of the calendar filter. */
+export function nextInvoiceMonth(asOf:string,dueDay:number){const month=asOf.slice(0,7),day=Number(asOf.slice(8,10));const lastDay=new Date(Number(month.slice(0,4)),Number(month.slice(5,7)),0).getDate();return day<=Math.min(dueDay,lastDay)?month:addMonths(month,1);}
 export function amountAt(e:Entry,month:string){const i=monthIndex(month)-monthIndex(e.start);if(i<0||(!e.recurring&&i>=e.installments))return 0;if(e.recurring)return e.total;return Math.floor(e.total/e.installments)+(i<e.total%e.installments?1:0);}
+export function purchasesInMonth(s:State,month:string){return s.entries.filter(entry=>entry.date.slice(0,7)===month);}
+export function invoicesInMonth(s:State,month:string){return s.entries.filter(entry=>amountAt(entry,month)>0);}
+export function withoutCustomCategory(s:State,name:string):State{if(!s.customCategories.includes(name))return s;return {...s,customCategories:s.customCategories.filter(category=>category!==name),entries:s.entries.map(entry=>entry.category===name?{...entry,category:'Outros'}:entry),budgets:s.budgets.filter(budget=>budget.category!==name)};}
+export function upsertCard(s:State,card:Card):State{const old=s.cards.find(item=>item.id===card.id),cycleChanged=old&&(old.closing!==card.closing||old.due!==card.due);return {...s,cards:[...s.cards.filter(item=>item.id!==card.id),card],entries:cycleChanged?s.entries.map(entry=>entry.cardId===card.id?{...entry,start:firstInvoice(entry.date,card)}:entry):s.entries};}
 export function summary(s:State,month:string){const income=(month>=s.incomeStart?s.salary:0)+s.entries.filter(e=>e.kind==='income').reduce((a,e)=>a+amountAt(e,month),0);const expense=s.entries.filter(e=>e.kind==='expense').reduce((a,e)=>a+amountAt(e,month),0);return {income,expense,balance:income-expense,investment:Math.round(Math.max(0,income-expense)*s.reserve/100)};}
 export const money=(n:number)=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(n/100);
 export const monthLabel=(s:string)=>new Date(s+'-02T12:00:00').toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
