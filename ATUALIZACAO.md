@@ -31,6 +31,11 @@ Confirme que a configuração **Root Directory** do projeto Vercel aponta para a
 - Comprovantes privados, dívidas, lembretes, tela guiada, lançamento rápido e modo offline criptografado.
 - Dashboard ampliado com evolução de entradas e saídas dos últimos seis meses, distribuição das despesas por categoria, gasto médio e percentual da renda comprometida. Os gráficos também são ocultados pelo controle de privacidade.
 - Transições suaves com Motion em indicadores, painéis, ações e janelas, respeitando a preferência do dispositivo por movimento reduzido.
+- Resumo com faturas de cada cartão e contas bancárias anotadas manualmente. O saldo manual permanece separado do saldo previsto e não é sincronizado com bancos.
+- Relatórios detalhados com balanço do mês, despesas acumuladas por dia comparadas ao mês anterior, categorias com valores e percentuais e filtros de despesas recorrentes.
+- Estilo visual opcional **Verde natural**, inspirado nas referências, disponível em Configurações > Preferências. O estilo original continua disponível, assim como os modos claro, escuro e automático.
+- Novos painéis em Transações, Contas, Metas e Relatórios: resumo de entradas e saídas, patrimônio manual separado das faturas, progresso total das metas e comparação de receitas e despesas dos últimos seis meses.
+- Nova página de Configurações para escolher o visual, consultar categorias, avisos, backup e modo offline. Os campos de foto, telefone, troca de senha e autenticação em duas etapas exibidos nas referências não foram simulados: exigiriam armazenamento e fluxos de segurança próprios.
 
 Não há migração SQL adicional. O mesmo token do Vercel Blob privado é usado para os comprovantes. Teste o modo offline no dispositivo depois do redeploy, com a sessão ativa, e guarde a senha criada no próprio dispositivo.
 

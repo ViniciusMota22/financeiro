@@ -1,5 +1,33 @@
 # Registro financeiro — Next.js, Prisma e Neon
 
+## Recursos atuais
+
+- Visão mensal, comparação com o mês anterior e projeção do saldo.
+- Cartões de vários bancos com cores próprias, limite, fechamento e vencimento.
+- Pix, Pix Crédito, débito, crédito, dinheiro, boleto e transferência.
+- Parcelamento de 1 a 80 vezes e despesas recorrentes.
+- Identificação de compras feitas por outra pessoa no cartão do titular.
+- Categorias, orçamentos mensais e alertas de limite.
+- Calendário financeiro, assinaturas, metas e reserva de emergência.
+- Simulador de compra parcelada, relatórios anuais, CSV e backup JSON.
+- Importação de extratos OFX/CSV com reconhecimento de Pix e compras, sugestão e revisão de categorias, e prevenção de duplicatas.
+- Dívidas e empréstimos com previsão de quitação e comparação estimada de antecipação, categorias próprias e etiquetas nos lançamentos.
+- Comprovantes PDF ou imagem de até 5 MB em armazenamento privado, vinculados aos lançamentos.
+- Aplicativo instalável (PWA), modo claro, escuro ou automático, alertas de faturas, contas, assinaturas, orçamentos, metas e saldo negativo.
+- Cópia offline criptografada com senha configurada no dispositivo. Lançamentos feitos sem conexão são conciliados com alterações do servidor quando a sessão e a conexão retornam.
+- Tela inicial guiada, lançamento rápido no celular, lançamentos agrupados pela cor do cartão e fechamento mensal.
+- Login por senha e Google, dados privados por usuário e exclusão de conta.
+
+## Correção do salvamento no Vercel Blob
+
+O erro HTTP 409 era um conflito falso causado pela condição de ETag usada na atualização do arquivo. Como cada usuário possui um caminho privado próprio, o app agora grava o mesmo pathname com substituição atômica. A separação por conta permanece e nenhum SQL adicional é necessário.
+
+## Uso offline e notificações
+
+Abra o aplicativo conectado e escolha **Modo offline** no cabeçalho. Crie uma senha local de pelo menos 8 caracteres. A cópia do dispositivo é criptografada; sem essa senha ela não pode ser aberta. Quando a conexão voltar, o app confirma a sessão e concilia as alterações locais com as alterações independentes feitas no servidor. Se o mesmo registro for alterado nos dois lugares, prevalece a versão local.
+
+Os alertas são calculados ao abrir o aplicativo. As notificações do navegador dependem da permissão do dispositivo e do aplicativo aberto; não há servidor de envio programado quando ele estiver fechado.
+
 ## Correção de cadastro e login
 
 - O frontend e as duas rotas usam `{ email, password }`.
@@ -20,16 +48,10 @@
 | `DATABASE_URL` | URL PostgreSQL fornecida pelo Neon, com SSL; use a conexão com pool recomendada pelo Neon para a aplicação |
 | `SESSION_SECRET` | Segredo aleatório de pelo menos 32 caracteres, somente no servidor |
 | `BLOB_READ_WRITE_TOKEN` | Token do Vercel Blob privado, para os registros financeiros já usados pelo aplicativo |
-| `RESEND_API_KEY` | Chave da API Resend usada somente no servidor para enviar o link de redefinição |
-| `PASSWORD_RESET_FROM_EMAIL` | Remetente verificado, por exemplo `Registro Financeiro <contato@seudominio.com>` |
 | `GOOGLE_CLIENT_ID` | ID do cliente OAuth Web criado no Google Auth Platform |
 | `GOOGLE_CLIENT_SECRET` | Chave secreta do cliente OAuth, somente no servidor |
 
 `APP_PASSWORD` não é mais utilizada. Não use prefixo `NEXT_PUBLIC_` nas credenciais. Configure as variáveis nos ambientes desejados e faça um novo deploy. O cadastro de usuários utiliza o Neon; o armazenamento financeiro existente continua no Blob privado.
-
-## Redefinição de senha
-
-Execute `prisma/password-reset.sql` uma vez no SQL Editor do Neon. Depois configure `RESEND_API_KEY` e `PASSWORD_RESET_FROM_EMAIL` na Vercel. O link enviado expira em 30 minutos, guarda apenas o hash do token no banco e deixa de funcionar depois do primeiro uso. A resposta da solicitação é igual para e-mails cadastrados e desconhecidos.
 
 ## Login com Google
 
@@ -74,6 +96,6 @@ node --env-file=.env --env-file=.env.local tests/auth-neon.integration.mjs
 
 ## Validação desta correção
 
-Oito testes passaram, cobrindo cadastro/login, hash Bcrypt, cookie, validação, duplicidade, corrida de cadastro, assinatura e expiração da sessão, cuid string, isolamento dos registros financeiros e cálculos de parcelas. O teste real com Neon também passou, sem deixar conta de teste salva. O build Next.js foi concluído com as três rotas de autenticação.
+Quatorze testes passaram, cobrindo cadastro/login, hash Bcrypt, cookie, validação, duplicidade, corrida de cadastro, assinatura e expiração da sessão, cuid string, isolamento dos registros financeiros, sobrescrita no Blob, cálculos de parcelas, relatórios, contas manuais, importação OFX/CSV, sincronização offline e lembretes. O build Next.js foi concluído com as rotas atuais de autenticação, conta, finanças, comprovantes e manifesto PWA.
 
 Os dados financeiros do antigo arquivo único não são atribuídos automaticamente a uma conta: o código conserva esse arquivo sem expô-lo a usuários recém-cadastrados. Uma migração desses dados deve identificar explicitamente a conta proprietária.
