@@ -96,6 +96,6 @@ node --env-file=.env --env-file=.env.local tests/auth-neon.integration.mjs
 
 ## Validação desta correção
 
-Quatorze testes passaram, cobrindo cadastro/login, hash Bcrypt, cookie, validação, duplicidade, corrida de cadastro, assinatura e expiração da sessão, cuid string, isolamento dos registros financeiros, sobrescrita no Blob, cálculos de parcelas, relatórios, contas manuais, importação OFX/CSV, sincronização offline e lembretes. O build Next.js foi concluído com as rotas atuais de autenticação, conta, finanças, comprovantes e manifesto PWA.
+Os testes automatizados cobrem cadastro/login, hash Bcrypt, cookie, validação, duplicidade, corrida de cadastro, assinatura e expiração da sessão, cuid string, isolamento dos registros financeiros, sobrescrita no Blob, cálculos de parcelas e faturas, relatórios, contas manuais, importação OFX/CSV, sincronização offline, remoção de categorias e lembretes. Confirme o resultado atual com `npm test` e `npm run build` antes do deploy.
 
 Os dados financeiros do antigo arquivo único não são atribuídos automaticamente a uma conta: o código conserva esse arquivo sem expô-lo a usuários recém-cadastrados. Uma migração desses dados deve identificar explicitamente a conta proprietária.

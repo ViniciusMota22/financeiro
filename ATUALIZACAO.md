@@ -33,9 +33,13 @@ Confirme que a configuração **Root Directory** do projeto Vercel aponta para a
 - Transições suaves com Motion em indicadores, painéis, ações e janelas, respeitando a preferência do dispositivo por movimento reduzido.
 - Resumo com faturas de cada cartão e contas bancárias anotadas manualmente. O saldo manual permanece separado do saldo previsto e não é sincronizado com bancos.
 - Relatórios detalhados com balanço do mês, despesas acumuladas por dia comparadas ao mês anterior, categorias com valores e percentuais e filtros de despesas recorrentes.
-- Estilo visual opcional **Verde natural**, inspirado nas referências, disponível em Configurações > Preferências. O estilo original continua disponível, assim como os modos claro, escuro e automático.
+- Identidade visual roxa e branca restaurada em todas as telas novas; a opção de estilo verde foi removida. Os modos claro, escuro e automático continuam em Configurações > Preferências.
 - Novos painéis em Transações, Contas, Metas e Relatórios: resumo de entradas e saídas, patrimônio manual separado das faturas, progresso total das metas e comparação de receitas e despesas dos últimos seis meses.
-- Nova página de Configurações para escolher o visual, consultar categorias, avisos, backup e modo offline. Os campos de foto, telefone, troca de senha e autenticação em duas etapas exibidos nas referências não foram simulados: exigiriam armazenamento e fluxos de segurança próprios.
+- Nova página de Configurações para escolher o modo de cor, consultar categorias, avisos, backup e modo offline. Os campos de foto, telefone, troca de senha e autenticação em duas etapas exibidos nas referências não foram simulados: exigiriam armazenamento e fluxos de segurança próprios.
+- A renda e a reserva agora são editadas apenas em Configurações > Perfil. O bloco promocional e o atalho duplicado saíram da lateral.
+- Em Lançamentos, “Compras feitas no mês” usa a data da compra, e “Parcelas e faturas do mês” usa o mês de cobrança. Os cartões mostram inicialmente a próxima fatura a vencer; o seletor de mês permite consultar outra fatura.
+- Categorias personalizadas podem ser removidas. Os lançamentos da categoria removida passam para “Outros” e os limites dessa categoria são excluídos, após confirmação.
+- Logos PNG verificados de 14 instituições são incluídos em `public/banks` e aparecem ao escolher e visualizar cartões, inclusive offline. A URL de Neon fornecida respondeu 404, então Neon exibe o ícone padrão até existir um logo verificado.
 
 Não há migração SQL adicional. O mesmo token do Vercel Blob privado é usado para os comprovantes. Teste o modo offline no dispositivo depois do redeploy, com a sessão ativa, e guarde a senha criada no próprio dispositivo.
 
