@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "../vendor/shadcn-tailwind-4.13.0.css";
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap");
+
+.font-display{font-family:"Fraunces",serif;font-variant-numeric:tabular-nums}
 
 @utility scrollbar-thin {
   scrollbar-width: thin;
@@ -25,7 +28,7 @@
   --card-foreground: #171717;
   --popover: #ffffff;
   --popover-foreground: #171717;
-  --primary: #465ce0;
+  --primary: #6c3ce9;
   --primary-foreground: #fafafa;
   --secondary: #f5f5f5;
   --secondary-foreground: #171717;
@@ -36,10 +39,10 @@
   --destructive: #e7000b;
   --border: #e5e5e5;
   --input: #e5e5e5;
-  --ring: #465ce0;
-  --chart-1: #4f46e5;
-  --chart-2: #8b5cf6;
-  --chart-3: #6366f1;
+  --ring: #6c3ce9;
+  --chart-1: #6c3ce9;
+  --chart-2: #e4a72e;
+  --chart-3: #e4572e;
   --chart-4: #a78bfa;
   --chart-5: #c4b5fd;
   --radius: 0.625rem;
