@@ -17,7 +17,7 @@ export function bankLogoUrl(bank:string){const id=ispb[bank];return id?`/banks/$
 
 export default function BankLogo({bank,size=36}:{bank:string;size?:number}){
  const [failed,setFailed]=useState(false),url=bankLogoUrl(bank);
- return <span aria-label={`Logo de ${bank}`} className="inline-grid shrink-0 place-items-center overflow-hidden rounded-xl border border-slate-200 bg-white text-slate-500" style={{width:size,height:size}}>
+ return <span aria-label={`Logo de ${bank}`} className="rf-bank-logo inline-grid shrink-0 place-items-center overflow-hidden rounded-xl border border-slate-200 bg-white text-slate-500" style={{width:size,height:size}}>
   {url&&!failed?<Image src={url} alt="" unoptimized width={size-7} height={size-7} className="max-h-full max-w-full object-contain" onError={()=>setFailed(true)}/>:<CreditCard size={Math.round(size*.5)} aria-hidden="true"/>}
  </span>;
 }
