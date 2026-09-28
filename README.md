@@ -2,6 +2,9 @@
 
 ## Recursos atuais
 
+- Interface responsiva com navegação inferior no celular/tablet e lateral no PC; faturas em carrossel no celular e grids de duas ou três colunas nas telas maiores.
+- Identidade roxa própria, contraste nos modos claro/escuro/automático, Inter local na interface e Fraunces no saldo principal.
+
 - Visão mensal, comparação com o mês anterior e projeção do saldo.
 - Cartões de vários bancos com cores próprias, limite, fechamento e vencimento.
 - Pix, Pix Crédito, débito, crédito, dinheiro, boleto e transferência.

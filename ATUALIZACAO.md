@@ -1,5 +1,19 @@
 # Atualização completa
 
+## Redesign responsivo de setembro de 2026
+
+- Nova identidade #6C3CE9 / #4E2AC4, superfícies lilás e brancas e cores de texto ajustadas para contraste. Verde floresta e terracota identificam entradas e saídas.
+- Tema claro, escuro e automático aplicado também a avisos, formulários, seleção de cartões, gráficos e login. O aviso de fatura no modo escuro foi medido com contraste 5,89:1.
+- Inter incluída localmente para toda a interface e Fraunces apenas no saldo principal; fontes e licenças ficam em `app/fonts`. Nenhuma conexão com o Google Fonts é necessária durante build ou uso.
+- Celular: abas inferiores, ação central de novo lançamento, faturas em carrossel e formulários em janela inferior.
+- Tablet (768–1023 px): navegação inferior, saldo e gráfico em duas colunas, faturas em grid de duas colunas.
+- PC (a partir de 1024 px): lateral fixa, saldo e gráfico lado a lado, faturas em três colunas e lançamentos apresentados em colunas de descrição, categoria, data, valor e ações.
+- Contas, calendário, relatórios, importação, categorias, metas, dívidas, orçamentos, comprovantes e funções offline permanecem disponíveis. No celular/tablet, as seções adicionais ficam em Mais.
+- Janelas mantêm o foco do teclado, fecham com Escape e devolvem o foco ao controle de origem. Navegação lateral fechada não recebe foco no celular.
+- O arquivo `registro-financeiro-redesign.html`, entregue separadamente, é uma prévia independente com CSS, JavaScript, fontes e logos embutidos. Seus dados são fictícios; não substitui o backend Next.js deste pacote.
+
+Envie o projeto completo, incluindo as fontes, `app/globals.css`, `app/layout.tsx` e os componentes novos. Não envie arquivos de configuração com credenciais. Não é necessário alterar o banco de dados.
+
 Substitua o conteúdo do repositório pelos arquivos deste pacote. No GitHub, exclua manualmente estes arquivos antigos caso ainda apareçam:
 
 - `lib/password-reset.ts`
